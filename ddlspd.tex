@@ -1,0 +1,95 @@
+% =========================================================
+% Example usage of the ddlspd-coverpage package
+% =========================================================
+%
+% This file demonstrates how to:
+%  - compile with the required engine (XeLaTeX / LuaLaTeX)
+%  - enforce Arial, 11 pt
+%  - configure and render the DDLS cover page
+%  - access the project title later in the document
+%
+% Compile with:
+%   xelatex example.tex
+% =========================================================
+
+\documentclass[11pt]{article}
+
+% ---------------------------------------------------------
+% Font setup (required)
+% ---------------------------------------------------------
+% The DDLS template requires Arial, 11 pt.
+% This requires XeLaTeX or LuaLaTeX (NOT pdfLaTeX).
+
+\usepackage{fontspec}
+\setmainfont{Arial}
+
+% ---------------------------------------------------------
+% DDLS cover page package
+% ---------------------------------------------------------
+% This package provides:
+%  - \DDLSCoverPage{...}  (renders the mandatory cover page)
+%  - configuration keys for project metadata
+%  - accessor macros such as \DDLSTitle
+
+\usepackage{ddlspd-coverpage}
+
+\begin{document}
+
+% ---------------------------------------------------------
+% Mandatory DDLS cover page
+% ---------------------------------------------------------
+% All metadata is provided via key–value options.
+
+\DDLSCoverPage{
+  % -------------------------------------------------------
+  % Track selection (choose ONE)
+  % -------------------------------------------------------
+  % track = academic,
+  track = industrial,
+  % -------------------------------------------------------
+  % Project information
+  % -------------------------------------------------------
+  title = {Data-driven Example Project},
+  applicant = {Firstname Lastname},
+  % -------------------------------------------------------
+  % Supervision
+  % -------------------------------------------------------
+  acadsupervisor = {Academic Supervisor Name},
+  acadaffil = {Department, University},
+  % Optional (industrial track only)
+  indsupervisor = {Industrial Supervisor, Company},
+  % Optional
+  coresearchers = {Co-supervisor 1 (Affil); Co-supervisor 2 (Affil)}
+}
+
+% ---------------------------------------------------------
+% Accessing metadata after the cover page
+% ---------------------------------------------------------
+% After \DDLSCoverPage has been called, the project title
+% (and other fields) can be reused elsewhere in the document.
+%
+% The most common use case is to repeat the title at the
+% start of the research plan.
+
+{\textbf{\Large\DDLSTitle}}\\[0.75em]
+
+% ---------------------------------------------------------
+% Main proposal content starts here
+% ---------------------------------------------------------
+
+\noindent
+This document provides an example of how the project title,
+specified in the DDLS cover page, can be reused consistently
+throughout the proposal without duplication.
+
+% (Replace the text below with your actual proposal.)
+
+{\bf Main objectives:}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+{\bf Description of data-driven methods used and/or developed within the project.:}
+Ut enim ad minim veniam, quis nostrud exercitation ullamco
+laboris nisi ut aliquip ex ea commodo consequat.
+
+\end{document}

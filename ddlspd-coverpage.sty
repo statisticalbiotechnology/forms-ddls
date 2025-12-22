@@ -1,0 +1,226 @@
+% ddlspd-coverpage.sty
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ddlspd-coverpage}[2025/12/22 v0.4 DDLS cover page]
+
+% --- Dependencies ---
+\RequirePackage{graphicx}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{amssymb}
+\RequirePackage{xcolor}
+\RequirePackage[skins]{tcolorbox}
+\RequirePackage{enumitem}
+\RequirePackage{xparse}
+\RequirePackage{l3keys2e}
+
+% --- Geometry ---
+\RequirePackage[margin=2.5cm]{geometry}
+
+% --- Colors ---
+\definecolor{ddlsinstructions}{HTML}{A7C947}
+
+% ----------------------------
+% Defaults (user-overridable)
+% ----------------------------
+\newcommand\DDLS@HeaderText{Call for postdoc projects DDLS Research School}
+\newcommand\DDLS@LogoLeft{img/kaw.png}
+\newcommand\DDLS@LogoRight{img/scilifelab.png}
+\newcommand\DDLS@LogoLeftWidth{1.9cm}
+\newcommand\DDLS@LogoRightWidth{2.8cm}
+\newcommand\DDLS@ResearchArea{Data-driven Cell and Molecular Biology}
+
+% ----------------------------
+% Public setters
+% ----------------------------
+\newcommand{\DDLSSetHeader}[1]{\renewcommand\DDLS@HeaderText{#1}}
+\newcommand{\DDLSSetLogos}[2]{%
+  \renewcommand\DDLS@LogoLeft{#1}%
+  \renewcommand\DDLS@LogoRight{#2}%
+}
+\newcommand{\DDLSSetLogoWidths}[2]{%
+  \renewcommand\DDLS@LogoLeftWidth{#1}%
+  \renewcommand\DDLS@LogoRightWidth{#2}%
+}
+\newcommand{\DDLSSetResearchArea}[1]{\renewcommand\DDLS@ResearchArea{#1}}
+
+% ----------------------------
+% Column types
+% ----------------------------
+\newcolumntype{A}{>{\raggedright\arraybackslash}p{0.38\linewidth}}
+\newcolumntype{B}{>{\raggedright\arraybackslash}X}
+
+% ----------------------------
+% tcolorbox style
+% ----------------------------
+\tcbset{
+  ddlsbox/.style={
+    enhanced,
+    boxrule=0.5pt,
+    colframe=black,
+    colback=ddlsinstructions,
+    sharp corners,
+    shadow={1mm}{-1mm}{0mm}{black!50!white},
+    width=\linewidth,
+    left=1em, right=1em, top=0.6em, bottom=0.6em,
+  }
+}
+
+% ----------------------------
+% Keys + storage (including track)
+% ----------------------------
+\ExplSyntaxOn
+\tl_new:N \l_ddls_title_tl
+\tl_new:N \l_ddls_applicant_tl
+\tl_new:N \l_ddls_track_tl
+\tl_new:N \l_ddls_acadsupervisor_tl
+\tl_new:N \l_ddls_acadaffil_tl
+\tl_new:N \l_ddls_indsup_tl
+\tl_new:N \l_ddls_coresearchers_tl
+
+\keys_define:nn { ddls/cover } {
+  title          .tl_set:N = \l_ddls_title_tl,
+  applicant      .tl_set:N = \l_ddls_applicant_tl,
+  acadsupervisor .tl_set:N = \l_ddls_acadsupervisor_tl,
+  acadaffil      .tl_set:N = \l_ddls_acadaffil_tl,
+  indsupervisor  .tl_set:N = \l_ddls_indsup_tl,
+  coresearchers  .tl_set:N = \l_ddls_coresearchers_tl,
+
+  % Track selection: academic | industrial
+  track .choice:,
+  track / academic   .code:n = { \tl_set:Nn \l_ddls_track_tl { academic } },
+  track / industrial .code:n = { \tl_set:Nn \l_ddls_track_tl { industrial } },
+}
+
+\keys_set:nn { ddls/cover } {
+  title          = {Replace this text with your Title},
+  applicant      = {Replace this text with your name},
+  track          = academic,
+  acadsupervisor = {Replace this text with supervisors name},
+  acadaffil      = {Fill this in},
+  indsupervisor  = {},
+  coresearchers  = {},
+}
+
+% Apply keys (kept internal)
+\cs_new_protected:Npn \DDLScoverapplykeys #1
+  { \keys_set:nn { ddls/cover } { #1 } }
+
+% Checkbox symbols (no extra packages)
+\cs_new:Npn \ddls_box_empty:
+  { \ensuremath{\square} }
+
+\cs_new:Npn \ddls_box_checked:
+  {
+    \ensuremath{%
+      \square\mkern-12mu\checkmark
+    }
+  }
+%\cs_new:Npn \ddls_box_checked:   { \ensuremath{\blacksquare} }
+%\cs_new:Npn \ddls_box_empty:     { \ensuremath{\square} }
+
+\cs_new:Npn \DDLSTrackBoxes {%
+  Academic~%
+  \tl_if_eq:NnTF \l_ddls_track_tl { academic }
+    { \ddls_box_checked: }
+    { \ddls_box_empty: }%
+  \hspace{2em}%
+  Industrial~%
+  \tl_if_eq:NnTF \l_ddls_track_tl { industrial }
+    { \ddls_box_checked: }
+    { \ddls_box_empty: }%
+}
+
+% Printable wrappers (normal LaTeX command names)
+\cs_new:Npn \DDLSTitle         { \tl_use:N \l_ddls_title_tl }
+\cs_new:Npn \DDLSApplicant     { \tl_use:N \l_ddls_applicant_tl }
+\cs_new:Npn \DDLSAcadSup       { \tl_use:N \l_ddls_acadsupervisor_tl }
+\cs_new:Npn \DDLSAcadAffil     { \tl_use:N \l_ddls_acadaffil_tl }
+\cs_new:Npn \DDLSIndSup        { \tl_use:N \l_ddls_indsup_tl }
+\cs_new:Npn \DDLSCoResearchers { \tl_use:N \l_ddls_coresearchers_tl }
+\ExplSyntaxOff
+
+% ----------------------------
+% Main command
+% ----------------------------
+\NewDocumentCommand{\DDLSCoverPage}{m}{%
+  \DDLScoverapplykeys{#1}%
+
+  \thispagestyle{empty}%
+  \pagenumbering{gobble}%
+
+  \noindent
+  \begin{minipage}[c]{0.65\linewidth}
+    \textbf{\DDLS@HeaderText}
+  \end{minipage}%
+  \begin{minipage}[c]{0.35\linewidth}
+    \raggedleft
+    \includegraphics[width=\DDLS@LogoLeftWidth]{\DDLS@LogoLeft}\hspace{0.5em}%
+    \includegraphics[width=\DDLS@LogoRightWidth]{\DDLS@LogoRight}
+  \end{minipage}
+
+  \vspace{1.5em}
+
+  \noindent
+  \renewcommand{\arraystretch}{1.3}%
+  \begin{tabularx}{\linewidth}{| A | B |}
+  \hline
+    \textbf{Project title} & \DDLSTitle \\
+  \hline
+    \textbf{Applicant} & \DDLSApplicant \\
+  \hline
+    \textbf{Track} & \DDLSTrackBoxes \\
+  \hline
+    \textbf{Academic supervisor} & \DDLSAcadSup \\
+  \hline
+    \textbf{Affiliation of academic supervisor} & \DDLSAcadAffil \\
+  \hline
+    \textbf{If applicable Industrial supervisor, Name and Company} & \DDLSIndSup \\
+  \hline
+    \textbf{Name and affiliation of co-supervisor(s)} & \DDLSCoResearchers \\
+  \hline
+    \textbf{DDLS Research Area} & \DDLS@ResearchArea \\
+  \hline
+  \end{tabularx}
+  \vspace{1.5em}
+
+  \noindent
+  \begin{tcolorbox}[ddlsbox]
+    \textbf{Content instructions (Arial, font 11 pt.)}\\
+    \textbf{This page is a mandatory cover page of your proposal.}
+    For the points 1--4 below use Arial font size 11 and make sure to adhere to the maximum number
+    of pages, as well as to all other requirements specified in the call text and in the instructions in this
+    document. Specify all costs in SEK. Save your full application including this cover page as pdf
+    before uploading in Anubis.
+
+    \vspace{0.8em}
+
+    Any information that might be considered sensitive (pending patent or similar) needs to be marked
+    as such in the application.
+  \end{tcolorbox}
+
+  \noindent\textbf{1. Research plan (max. 4 pages):}
+  \begin{itemize}[leftmargin=1.5em]
+    \setlength\itemsep{0.4em}
+    \item \textbf{Main objectives, background, methodology, impact, and future potential of the project.}
+    \item \textbf{Description of data-driven methods used and/or developed within the project.}
+    \item \textbf{Budget, time plan, project risks, and mitigation plan.}
+  \end{itemize}
+
+  \noindent\textbf{2. FAIR} - past contributions: Self-assessment of previous activities in line with FAIR principles
+  (e.g., data sharing, open repositories, software development, standards compliance) and FAIR - future
+  commitments: Statement on how the candidate will ensure FAIR usage and contributions within the
+  proposed project (e.g., dataset deposition, open-source code, metadata standards, interoperability with
+  existing infrastructures) (max 0.5 page).
+
+  \par\noindent\textbf{3. Ethics self-assessment} (in template form; if ethical approval is needed, this must be clearly stated)
+  (1 page, if needed).
+
+  \par\noindent\textbf{4. Curriculum vitae of the candidate}, including a list of publications, and two reference persons (max. 2 pages).
+  \par\noindent\textbf{5. Curriculum vitae of academic, and when applicable, industrial supervisor}, including relevant publications. (max. 2 pages each).
+  \par\noindent\textbf{6. Curriculum vitae of any co-supervisors.} (max. 1 page each)
+
+  \newpage
+  \clearpage
+  \pagenumbering{arabic}
+  \setcounter{page}{1}
+}
